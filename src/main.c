@@ -11,7 +11,7 @@ int main(void)
 
     // Initializations
     directivity_t* directivity = (directivity_t*) malloc(sizeof(directivity_t));
-    if (0 != load_directivity("Dynaudio_Xeo_3.mat", directivity)) {
+    if (0 != load_directivity("deps/sound-source-directivities/musical_instruments/bassoon_modern_TUB_RWTH/Bassoon_modern_et_ff_a2.mat", directivity)) {
         return -1;
     }
 

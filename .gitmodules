@@ -1,3 +1,6 @@
 [submodule "deps/matio"]
 	path = deps/matio
 	url = git://git.code.sf.net/p/matio/matio
+[submodule "deps/sound-source-directivities"]
+	path = deps/sound-source-directivities
+	url = git@github.com:AppliedAcousticsChalmers/sound-source-directivities.git
