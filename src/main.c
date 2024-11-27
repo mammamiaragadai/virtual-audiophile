@@ -24,9 +24,7 @@ void LoadMat(const char* path)
     const char* header = Mat_GetHeader(matfp);
     printf("Header: %s\n", header);
 
-    matvar = Mat_VarRead(matfp, "irs");
-    if (matvar != NULL)
-    {
+    while ( NULL != (matvar = Mat_VarReadNext(matfp)) ) {
         Mat_VarPrint(matvar, 1);
         Mat_VarFree(matvar);
     }
