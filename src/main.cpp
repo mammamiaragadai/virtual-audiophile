@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "directivity.h"
+#include "directivity.hpp"
 
 void print_array(double* array, int n);
 void print_matrix(double* matrix, int n_rows, int n_cols);
@@ -19,7 +19,7 @@ int main(void)
     printf("R: %g | fs: %g | order: %g | n_fft: %d | n_recievers: %d\n", directivity->R, directivity->fs, directivity->order, directivity->n_fft, directivity->n_recievers);
     print_array(directivity->azimuth, directivity->n_recievers);
     print_array(directivity->colatitude, directivity->n_recievers);
-    // print_matrix(directivity->irs, directivity->n_fft, directivity->n_recievers);
+    print_matrix(directivity->irs, directivity->n_fft, directivity->n_recievers);
 
     // Destroy
     free_directivity(directivity);

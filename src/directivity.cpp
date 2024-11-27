@@ -1,6 +1,6 @@
 #include <matio.h>
 #include <string.h>
-#include "directivity.h"
+#include "directivity.hpp"
 
 int load_directivity(const char* matpath, directivity_t *directivity)
 {
