@@ -4,3 +4,6 @@
 [submodule "deps/sound-source-directivities"]
 	path = deps/sound-source-directivities
 	url = git@github.com:AppliedAcousticsChalmers/sound-source-directivities.git
+[submodule "deps/matplotlib-cpp"]
+	path = deps/matplotlib-cpp
+	url = https://github.com/lava/matplotlib-cpp.git
