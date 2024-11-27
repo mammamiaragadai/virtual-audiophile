@@ -11,11 +11,13 @@ typedef struct {
     double order; // scalar
 
     unsigned int n_recievers; // scalar
+    unsigned int n_fft;
 } directivity_t;
 
 int load_directivity(const char* matpath, directivity_t *directivity);
 void free_directivity(directivity_t* directivity);
 void print_array(double* array, int n);
+void print_matrix(double* matrix, int n_rows, int n_cols);
 
 int main(void)
 {
@@ -28,9 +30,10 @@ int main(void)
     }
 
     // Processing
-    printf("R: %g | fs: %g | order: %g\n", directivity->R, directivity->fs, directivity->order);
-    print_array(directivity->azimuth, directivity->n_recievers);
-    print_array(directivity->colatitude, directivity->n_recievers);
+    printf("R: %g | fs: %g | order: %g | n_fft: %d | n_recievers: %d\n", directivity->R, directivity->fs, directivity->order, directivity->n_fft, directivity->n_recievers);
+    // print_array(directivity->azimuth, directivity->n_recievers);
+    // print_array(directivity->colatitude, directivity->n_recievers);
+    print_matrix(directivity->irs, directivity->n_fft, directivity->n_recievers);
 
     // Destroy
     free_directivity(directivity);
@@ -55,6 +58,7 @@ int load_directivity(const char* matpath, directivity_t *directivity)
     directivity->fs = *(double*) matvar->data;
     matvar = Mat_VarRead(matfp, "order");
     directivity->order = *(double*) matvar->data;
+
     matvar = Mat_VarRead(matfp, "azimuth");
     directivity->azimuth = (double*) malloc(matvar->nbytes);
     memcpy(directivity->azimuth, matvar->data, matvar->nbytes);
@@ -62,6 +66,12 @@ int load_directivity(const char* matpath, directivity_t *directivity)
     directivity->colatitude = (double*) malloc(matvar->nbytes);
     memcpy(directivity->colatitude, matvar->data, matvar->nbytes);
     directivity->n_recievers = matvar->nbytes / matvar->data_size;
+    
+    matvar = Mat_VarRead(matfp, "irs");
+    printf("dims: %ld, %ld\n", matvar->dims[0], matvar->dims[1]);
+    directivity->irs = (double*) malloc(matvar->nbytes);
+    memcpy(directivity->irs, matvar->data, matvar->nbytes);
+    directivity->n_fft = matvar->nbytes / matvar->data_size / directivity->n_recievers;
 
     Mat_VarFree(matvar);
     Mat_Close(matfp);
@@ -72,6 +82,7 @@ void free_directivity(directivity_t* directivity)
 {
     free(directivity->azimuth);
     free(directivity->colatitude);
+    free(directivity->irs);
     free(directivity);
 }
 
@@ -81,6 +92,18 @@ void print_array(double* array, int n)
     for (int i = 0; i < n; i++)
     {
         printf("%f ", array[i]);
+    }
+    printf("]\n");
+}
+
+void print_matrix(double* matrix, int n_rows, int n_cols)
+{
+    int i, j;
+
+    printf("[");
+    for (i = 0; i < n_rows; i++)
+    {
+        print_array(matrix + i * n_cols, n_cols);
     }
     printf("]\n");
 }
