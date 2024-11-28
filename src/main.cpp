@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <matplotlibcpp.h>
+#include <fftw3.h>
 #include "directivity.hpp"
 
 void print_array(double* array, int n);

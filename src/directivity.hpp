@@ -1,3 +1,6 @@
+#include <complex.h>
+#include <fftw3.h>
+
 typedef struct {
     double  R; // scalar
     double* azimuth; // vector
@@ -8,6 +11,8 @@ typedef struct {
 
     unsigned int n_recievers; // scalar
     unsigned int n_fft;
+
+    fftw_complex* tfs;
 } directivity_t;
 
 int load_directivity(const char* matpath, directivity_t *directivity);
