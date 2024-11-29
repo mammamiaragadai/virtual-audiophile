@@ -1,5 +1,6 @@
 #include <matio.h>
 #include <string.h>
+#include <fftw3.h>
 #include "directivity.hpp"
 
 int load_directivity(const char* matpath, directivity_t *directivity)
@@ -44,11 +45,20 @@ int load_directivity(const char* matpath, directivity_t *directivity)
     memcpy(directivity->irs, matvar->data, matvar->nbytes);
     directivity->n_fft = matvar->nbytes / matvar->data_size / directivity->n_recievers;
 
-    directivity->tfs = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * directivity->n_fft);
-    fftw_plan plan = fftw_plan_dft_r2c_1d(directivity->n_fft, directivity->irs, directivity->tfs, FFTW_ESTIMATE);
-    fftw_execute(plan);
+    // Obtain FFT of impulse responses of each row
+    double* fftw_in = (double*) malloc(sizeof(double) * directivity->n_fft);
+    std::complex<double>* fftw_out = (std::complex<double>*) malloc(sizeof(std::complex<double>) * directivity->n_fft);
+    directivity->tfs = (std::complex<double>*) malloc(sizeof(std::complex<double>) * directivity->n_recievers * directivity->n_fft);
+    fftw_plan plan = fftw_plan_dft_r2c_1d(directivity->n_fft, fftw_in, reinterpret_cast<fftw_complex*>(fftw_out), FFTW_ESTIMATE);
+    for (int i = 0; i < directivity->n_recievers; i++)
+    {
+        memcpy(fftw_in, directivity->irs + i * directivity->n_fft, directivity->n_fft);
+        fftw_execute(plan);
+        memcpy(directivity->tfs + i * directivity->n_fft, fftw_out, directivity->n_fft);
+    }
 
     free(azimuth); free(colatitude);
+    free(fftw_in); free(fftw_out);
     Mat_VarFree(matvar);
     Mat_Close(matfp);
     fftw_destroy_plan(plan);

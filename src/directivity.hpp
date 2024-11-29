@@ -2,7 +2,6 @@
 #define DIRECTIVITY_HPP
 
 #include <complex.h>
-#include <fftw3.h>
 
 typedef struct {
     double azimuth;
@@ -17,15 +16,15 @@ typedef struct {
 } cartesian_coords_t;
 
 typedef struct {
-    double  fs; // scalar
-    double* irs; // matrix
-    double order; // scalar
+    double  fs; // sampling rate; scalar
+    double* irs; // impulse response; matrix
+    double order; // spherical harmonics order; scalar
 
-    unsigned int n_recievers; // scalar
-    unsigned int n_fft;
+    unsigned int n_recievers; // number of receivers; scalar
+    unsigned int n_fft; // number of FFT points; scalar
 
-    fftw_complex* tfs;
-    spherical_coords_t* coords;
+    std::complex<double>* tfs; // FFT of impulse responses; matrix
+    spherical_coords_t* coords; // spherical coordinates
 
 } directivity_t;
 
