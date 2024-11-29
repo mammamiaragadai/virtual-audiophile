@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -21,13 +22,17 @@ int main(void)
     }
 
     // Processing
-    printf("R: %g | fs: %g | order: %g | n_fft: %d | n_recievers: %d\n", directivity->R, directivity->fs, directivity->order, directivity->n_fft, directivity->n_recievers);
-    print_array(directivity->azimuth, directivity->n_recievers);
-    print_array(directivity->colatitude, directivity->n_recievers);
-    // print_matrix(directivity->irs, directivity->n_fft, directivity->n_recievers);
-    
-    std::vector v1(directivity->azimuth, directivity->azimuth + directivity->n_recievers);
-    plt::plot(v1);
+    printf("R: %g | fs: %g | order: %g | n_fft: %d | n_recievers: %d\n", directivity->coords[0].r, directivity->fs, directivity->order, directivity->n_fft, directivity->n_recievers);
+    std::vector<double> x, y, z;
+    for (int i = 0; i < directivity->n_recievers; i++) {
+        auto cart = sph2cart(directivity->coords[i]);
+        x.push_back(cart.x);
+        y.push_back(cart.y);
+        z.push_back(cart.z);
+        printf("x: %f  y: %f  z: %f\n", cart.x, cart.y, cart.z);
+    }
+
+    plt::scatter(x, y, z);
     plt::show();
 
     // Destroy

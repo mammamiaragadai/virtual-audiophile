@@ -4,6 +4,7 @@
 
 int load_directivity(const char* matpath, directivity_t *directivity)
 {
+    int i;
     mat_t* matfp;
     matvar_t* matvar;
 
@@ -14,21 +15,29 @@ int load_directivity(const char* matpath, directivity_t *directivity)
         return -1;
     }
 
+    double R;
+    double *azimuth, *colatitude;
+
     matvar = Mat_VarRead(matfp, "R");
-    directivity->R = *(double*) matvar->data;
+    R = *(double*) matvar->data;
     matvar = Mat_VarRead(matfp, "fs");
     directivity->fs = *(double*) matvar->data;
     matvar = Mat_VarRead(matfp, "order");
     directivity->order = *(double*) matvar->data;
 
     matvar = Mat_VarRead(matfp, "azimuth");
-    directivity->azimuth = (double*) malloc(matvar->nbytes);
-    memcpy(directivity->azimuth, matvar->data, matvar->nbytes);
+    azimuth = (double*) malloc(matvar->nbytes);
+    memcpy(azimuth, matvar->data, matvar->nbytes);
     matvar = Mat_VarRead(matfp, "colatitude");
-    directivity->colatitude = (double*) malloc(matvar->nbytes);
-    memcpy(directivity->colatitude, matvar->data, matvar->nbytes);
+    colatitude = (double*) malloc(matvar->nbytes);
+    memcpy(colatitude, matvar->data, matvar->nbytes);
     directivity->n_recievers = matvar->nbytes / matvar->data_size;
-    
+    directivity->coords = (spherical_coords_t*) malloc(sizeof(spherical_coords_t) * directivity->n_recievers);
+    for (i = 0; i < directivity->n_recievers; i++)
+    {
+        directivity->coords[i] = { .azimuth = azimuth[i], .elevation = M_PI_2 - colatitude[i], .r = R };
+    }
+
     matvar = Mat_VarRead(matfp, "irs");
     printf("dims: %ld, %ld\n", matvar->dims[0], matvar->dims[1]);
     directivity->irs = (double*) malloc(matvar->nbytes);
@@ -39,6 +48,7 @@ int load_directivity(const char* matpath, directivity_t *directivity)
     fftw_plan plan = fftw_plan_dft_r2c_1d(directivity->n_fft, directivity->irs, directivity->tfs, FFTW_ESTIMATE);
     fftw_execute(plan);
 
+    free(azimuth); free(colatitude);
     Mat_VarFree(matvar);
     Mat_Close(matfp);
     fftw_destroy_plan(plan);
@@ -47,9 +57,26 @@ int load_directivity(const char* matpath, directivity_t *directivity)
 
 void free_directivity(directivity_t* directivity)
 {
-    free(directivity->azimuth);
-    free(directivity->colatitude);
+    free(directivity->coords);
     free(directivity->irs);
     fftw_free(directivity->tfs);
     free(directivity);
+}
+
+cartesian_coords_t sph2cart(spherical_coords_t sph)
+{
+    cartesian_coords_t cart;
+    cart.x = sph.r * cos(sph.elevation) * cos(sph.azimuth);
+    cart.y = sph.r * cos(sph.elevation) * sin(sph.azimuth);
+    cart.z = sph.r * sin(sph.elevation);
+    return cart;
+}
+
+spherical_coords_t cart2sph(cartesian_coords_t cart)
+{
+    spherical_coords_t sph;
+    sph.elevation = acos(cart.z / sqrt(cart.x * cart.x + cart.y * cart.y));
+    sph.azimuth = atan2(cart.y, cart.x);
+    sph.r = sqrt(cart.x * cart.x + cart.y * cart.y + cart.z * cart.z);
+    return sph;
 }
