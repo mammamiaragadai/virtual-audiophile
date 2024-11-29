@@ -1,3 +1,6 @@
+#ifndef DIRECTIVITY_HPP
+#define DIRECTIVITY_HPP
+
 #include <complex.h>
 #include <fftw3.h>
 
@@ -30,3 +33,5 @@ int load_directivity(const char* matpath, directivity_t *directivity);
 void free_directivity(directivity_t* directivity);
 cartesian_coords_t sph2cart(spherical_coords_t sph);
 spherical_coords_t cart2sph(cartesian_coords_t cart);
+
+#endif  // DIRECTIVITY_HPP
